@@ -41,8 +41,8 @@
             "name": "bid",
             "args": [
                 {
-                    "type": "pay",
-                    "name": "axfer"
+                    "type": "axfer",
+                    "name": "payment"
                 },
                 {
                     "type": "account",

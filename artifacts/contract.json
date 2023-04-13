@@ -7,10 +7,6 @@
                 {
                     "type": "asset",
                     "name": "asset"
-                },
-                {
-                    "type": "asset",
-                    "name": "payment_asset"
                 }
             ],
             "returns": {
@@ -42,7 +38,7 @@
             "args": [
                 {
                     "type": "pay",
-                    "name": "axfer"
+                    "name": "payment"
                 },
                 {
                     "type": "account",

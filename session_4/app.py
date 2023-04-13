@@ -37,6 +37,12 @@ class AuctionState:
         descr="ID of the ASA being auctioned",
     )
 
+    payment_asa: Final[GlobalStateValue] = GlobalStateValue(
+        stack_type=TealType.uint64,
+        default=Int(0),
+        descr="ID of the ASA being used for payment",
+    )
+
 
 app = Application("Auction", state=AuctionState)
 
@@ -49,22 +55,39 @@ def create() -> Expr:
 
 # Only allow app creator to opt the app account into a ASA
 @app.external(authorize=Authorize.only(Global.creator_address()))
-def opt_into_asset(asset: abi.Asset) -> Expr:
+def opt_into_asset(asset: abi.Asset, payment_asset: abi.Asset) -> Expr:
     return Seq(
         # Verify a ASA hasn't already been opted into
         Assert(app.state.asa == Int(0)),
+        # Verify a ASA hasn't already been opted into
+        Assert(app.state.payment_asa == Int(0)),
         # Save ASA ID in global state
         app.state.asa.set(asset.asset_id()),
+        # Save ASA ID in global state
+        app.state.payment_asa.set(payment_asset.asset_id()),
+        
         # Submit opt-in transaction: 0 asset transfer to self
-        InnerTxnBuilder.Execute(
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
             {
                 TxnField.type_enum: TxnType.AssetTransfer,
                 TxnField.fee: Int(0),  # cover fee with outer txn
                 TxnField.asset_receiver: Global.current_application_address(),
                 TxnField.xfer_asset: asset.asset_id(),
                 TxnField.asset_amount: Int(0),
-            }
+            },
         ),
+        InnerTxnBuilder.Next(),  # This indicates we're moving to constructing the next txn in the group
+        InnerTxnBuilder.SetFields(
+{
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.fee: Int(0),  # cover fee with outer txn
+                TxnField.asset_receiver: Global.current_application_address(),
+                TxnField.xfer_asset: payment_asset.asset_id(),
+                TxnField.asset_amount: Int(0),
+            }    
+        ),
+        InnerTxnBuilder.Submit(),
     )
 
 
@@ -91,16 +114,15 @@ def start_auction(
 def pay(receiver: Expr, amount: Expr) -> Expr:
     return InnerTxnBuilder.Execute(
         {
-            TxnField.type_enum: TxnType.Payment,
+            TxnField.type_enum: TxnType.AssetTransfer,
             TxnField.receiver: receiver,
             TxnField.amount: amount,
             TxnField.fee: Int(0),  # cover fee with outer txn
         }
     )
 
-
 @app.external
-def bid(payment: abi.PaymentTransaction, previous_bidder: abi.Account) -> Expr:
+def bid(payment: abi.AssetTransferTransaction, previous_bidder: abi.Account) -> Expr:
     return Seq(
         # Ensure auction hasn't ended
         Assert(Global.latest_timestamp() < app.state.auction_end.get()),

@@ -121,7 +121,7 @@
                 "args": [
                     {
                         "type": "pay",
-                        "name": "payment"
+                        "name": "axfer"
                     },
                     {
                         "type": "account",
