@@ -39,7 +39,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub delete_8
+callsub delete_7
 intc_1 // 1
 return
 main_l9:
@@ -61,7 +61,7 @@ getbyte
 store 7
 load 6
 load 7
-callsub claimasset_7
+callsub claimasset_6
 intc_1 // 1
 return
 main_l10:
@@ -73,7 +73,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub claimbid_6
+callsub claimbid_5
 intc_1 // 1
 return
 main_l11:
@@ -95,7 +95,7 @@ intc_2 // axfer
 ==
 assert
 load 5
-callsub bid_5
+callsub bid_4
 intc_1 // 1
 return
 main_l12:
@@ -296,20 +296,9 @@ itxn_field Fee
 itxn_submit
 retsub
 
-// assert_auction_not_over
-assertauctionnotover_4:
-proto 0 0
-global LatestTimestamp
-bytec 4 // "auction_end"
-app_global_get
-<
-assert
-retsub
-
 // bid
-bid_5:
+bid_4:
 proto 1 0
-callsub assertauctionnotover_4
 frame_dig -1
 gtxns Amount
 bytec_0 // "highest_bid"
@@ -336,7 +325,7 @@ bytec_3 // "highest_bidder"
 app_global_get
 bytec 6 // ""
 !=
-bz bid_5_l2
+bz bid_4_l2
 bytec_3 // "highest_bidder"
 app_global_get
 bytec_0 // "highest_bid"
@@ -344,7 +333,7 @@ app_global_get
 bytec_1 // "payment_asa"
 app_global_get
 callsub pay_3
-bid_5_l2:
+bid_4_l2:
 bytec_0 // "highest_bid"
 frame_dig -1
 gtxns Amount
@@ -356,7 +345,7 @@ app_global_put
 retsub
 
 // claim_bid
-claimbid_6:
+claimbid_5:
 proto 0 0
 global CreatorAddress
 bytec_0 // "highest_bid"
@@ -367,7 +356,7 @@ callsub pay_3
 retsub
 
 // claim_asset
-claimasset_7:
+claimasset_6:
 proto 2 0
 bytec_3 // "highest_bidder"
 app_global_get
@@ -379,7 +368,7 @@ callsub pay_3
 retsub
 
 // delete
-delete_8:
+delete_7:
 proto 0 0
 itxn_begin
 intc_1 // pay
