@@ -300,18 +300,18 @@ retsub
 bid_4:
 proto 1 0
 frame_dig -1
-gtxns Amount
+gtxns AssetAmount
 bytec_0 // "highest_bid"
 app_global_get
 >
 assert
 frame_dig -1
-gtxns Sender
+gtxns AssetSender
 txn Sender
 ==
 assert
 frame_dig -1
-gtxns Receiver
+gtxns AssetReceiver
 global CurrentApplicationAddress
 ==
 assert
