@@ -15,7 +15,8 @@
             ],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "opt into assets"
         },
         {
             "name": "start_auction",
@@ -35,7 +36,8 @@
             ],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "start auction"
         },
         {
             "name": "bid",
@@ -43,6 +45,10 @@
                 {
                     "type": "axfer",
                     "name": "payment"
+                },
+                {
+                    "type": "account",
+                    "name": "previous_bidder"
                 }
             ],
             "returns": {
@@ -80,7 +86,8 @@
             "args": [],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "delete app"
         }
     ],
     "networks": {}

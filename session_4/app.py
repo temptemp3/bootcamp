@@ -52,10 +52,10 @@ def create() -> Expr:
     # Set all global state to the default values
     return app.initialize_global_state()
 
-
 # Only allow app creator to opt the app account into a ASA
 @app.external(authorize=Authorize.only(Global.creator_address()))
 def opt_into_asset(asset: abi.Asset, payment_asset: abi.Asset) -> Expr:
+    """ opt into assets """
     return Seq(
         # Verify a ASA hasn't already been opted into
         Assert(app.state.asa == Int(0)),
@@ -97,6 +97,7 @@ def start_auction(
     length: abi.Uint64,
     axfer: abi.AssetTransferTransaction,
 ) -> Expr:
+    """ start auction """
     return Seq(
         # Ensure the auction hasn't already been started
         Assert(app.state.auction_end.get() == Int(0)),
@@ -112,7 +113,7 @@ def start_auction(
 # pay
 # - pay receiver amount in asset
 @Subroutine(TealType.none)
-def pay(receiver: Expr, amount: Expr, asset) -> Expr:
+def pay(receiver: Expr, amount: Expr, asset: Expr) -> Expr:
     """ pay asa """
     return InnerTxnBuilder.Execute(
         {
@@ -135,7 +136,7 @@ def assert_auction_over() -> Expr:
     return not assert_auction_not_over()
 
 @app.external
-def bid(payment: abi.AssetTransferTransaction) -> Expr:
+def bid(payment: abi.AssetTransferTransaction, previous_bidder: abi.Account) -> Expr:
     """ accept new bid """
     return Seq(
         # Ensure auction hasn't ended
@@ -181,6 +182,7 @@ def claim_asset(asset: abi.Asset, asset_creator: abi.Account) -> Expr:
 
 @app.delete
 def delete() -> Expr:
+    """ delete app """
     return Seq(
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields(
