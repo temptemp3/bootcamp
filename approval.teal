@@ -336,7 +336,7 @@ callsub pay_3
 bid_4_l2:
 bytec_0 // "highest_bid"
 frame_dig -1
-gtxns Amount
+gtxns AssetAmount
 app_global_put
 bytec_3 // "highest_bidder"
 frame_dig -1

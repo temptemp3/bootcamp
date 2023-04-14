@@ -152,7 +152,7 @@ def bid(payment: abi.AssetTransferTransaction) -> Expr:
             pay(app.state.highest_bidder.get(), app.state.highest_bid.get(), app.state.payment_asa.get()),
         ),
         # Set global state
-        app.state.highest_bid.set(payment.get().amount()), # set new highest bid
+        app.state.highest_bid.set(payment.get().asset_amount()), # set new highest bid
         app.state.highest_bidder.set(payment.get().sender()), # set new highest bidder
     )
 
