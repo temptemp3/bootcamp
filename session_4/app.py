@@ -106,73 +106,117 @@ def start_auction(
         # Set global state
         app.state.asa_amt.set(axfer.get().asset_amount()),
         app.state.auction_end.set(Global.latest_timestamp() + length.get()),
-        app.state.highest_bid.set(starting_price.get()),
+        app.state.highest_bid.set(starting_price.get()), # what happens if no one bids
     )
 
-
+# pay
+# - pay receiver amount in asset
 @Subroutine(TealType.none)
-def pay(receiver: Expr, amount: Expr) -> Expr:
+def pay(receiver: Expr, amount: Expr, asset) -> Expr:
+    """ pay asa """
     return InnerTxnBuilder.Execute(
         {
             TxnField.type_enum: TxnType.AssetTransfer,
-            TxnField.receiver: receiver,
-            TxnField.amount: amount,
+            TxnField.asset_receiver: receiver,
+            TxnField.asset_amount: amount,
+            TxnField.xfer_asset: asset,
             TxnField.fee: Int(0),  # cover fee with outer txn
         }
     )
 
+@Subroutine(TealType.none)
+def assert_auction_not_over() -> Expr:
+    """ auction not over """
+    return Assert(Global.latest_timestamp() < app.state.auction_end.get())
+
+@Subroutine(TealType.none)
+def assert_auction_over() -> Expr:
+    """ auction over """
+    return not assert_auction_not_over()
+
 @app.external
-def bid(payment: abi.AssetTransferTransaction, previous_bidder: abi.Account) -> Expr:
+def bid(payment: abi.AssetTransferTransaction) -> Expr:
+    """ accept new bid """
     return Seq(
         # Ensure auction hasn't ended
-        Assert(Global.latest_timestamp() < app.state.auction_end.get()),
+        assert_auction_not_over(),
         # Verify payment transaction
-        Assert(payment.get().amount() > app.state.highest_bid.get()),
-        Assert(Txn.sender() == payment.get().sender()),
-        Assert(payment.get().receiver() == Global.current_application_address()),
+        Assert(payment.get().amount() > app.state.highest_bid.get()), # amount is gt highest bid
+        Assert(payment.get().sender() == Txn.sender()), # txn sender is payment sender
+        Assert(payment.get().receiver() == Global.current_application_address()), # is to app address
+        Assert(payment.get().xfer_asset() == app.state.payment_asa), # is in payment token
         # Return previous bid if there was one
+        # TODO add fallback for optout attack
         If(
-            app.state.highest_bidder.get() != Bytes(""),
-            pay(app.state.highest_bidder.get(), app.state.highest_bid.get()),
+            app.state.highest_bidder.get() != Bytes(""), # not sure if this works are if it is translated into the zero address
+            pay(app.state.highest_bidder.get(), app.state.highest_bid.get(), app.state.payment_asa.get()),
         ),
         # Set global state
-        app.state.highest_bid.set(payment.get().amount()),
-        app.state.highest_bidder.set(payment.get().sender()),
+        app.state.highest_bid.set(payment.get().amount()), # set new highest bid
+        app.state.highest_bidder.set(payment.get().sender()), # set new highest bidder
     )
 
 
 @app.external
 def claim_bid() -> Expr:
+    """ send payment asas to creator """
     return Seq(
         # Auction end check is commented out for automated testing
-        # Assert(Global.latest_timestamp() > app.state.auction_end.get()),
-        pay(Global.creator_address(), app.state.highest_bid.get()),
+        #assert_auction_over(),
+        # Asset previous highest bidder not ""
+        pay(Global.creator_address(), app.state.highest_bid.get(), app.state.payment_asa.get())
     )
 
 
 @app.external
 def claim_asset(asset: abi.Asset, asset_creator: abi.Account) -> Expr:
+    """ send asa to highest bidder  """
     return Seq(
         # Auction end check is commented out for automated testing
-        # Assert(Global.latest_timestamp() > app.state.auction_end.get()),
+        #assert_auction_over(),
         # Send ASA to highest bidder
-        InnerTxnBuilder.Execute(
-            {
-                TxnField.type_enum: TxnType.AssetTransfer,
-                TxnField.fee: Int(0),  # cover fee with outer txn
-                TxnField.xfer_asset: app.state.asa,
-                TxnField.asset_amount: app.state.asa_amt,
-                TxnField.asset_receiver: app.state.highest_bidder,
-                # Close to asset creator since they are guranteed to be opted in
-                TxnField.asset_close_to: asset_creator.address(),
-            }
-        ),
+        pay(app.state.highest_bidder.get(), app.state.highest_bid.get(), app.state.asa.get())
     )
 
 
 @app.delete
 def delete() -> Expr:
-    return InnerTxnBuilder.Execute(
+    return Seq(
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.Payment,
+                TxnField.fee: Int(0),  
+                TxnField.receiver: Global.creator_address(),
+                TxnField.close_remainder_to: Global.creator_address(),
+                TxnField.amount: Int(0),
+            }
+        ),
+        InnerTxnBuilder.Next(),  
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.fee: Int(0), 
+                TxnField.xfer_asset: app.state.asa.get(), ### !!!
+                TxnField.asset_amount: Int(0),
+                TxnField.asset_receiver: Global.creator_address(),
+                TxnField.asset_close_to: Global.creator_address(),
+            }
+        ),
+        InnerTxnBuilder.Next(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.fee: Int(0), 
+                TxnField.xfer_asset: app.state.payment_asa.get(), ### !!!
+                TxnField.asset_amount: Int(0),
+                TxnField.asset_receiver: Global.creator_address(),
+                TxnField.asset_close_to: Global.creator_address(),
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+    )
+    InnerTxnBuilder.Execute(
         {
             TxnField.type_enum: TxnType.Payment,
             TxnField.fee: Int(0),  # cover fee with outer txn

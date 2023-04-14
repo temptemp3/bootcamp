@@ -43,22 +43,20 @@
                 {
                     "type": "axfer",
                     "name": "payment"
-                },
-                {
-                    "type": "account",
-                    "name": "previous_bidder"
                 }
             ],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "accept new bid"
         },
         {
             "name": "claim_bid",
             "args": [],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "send payment asas to creator"
         },
         {
             "name": "claim_asset",
@@ -74,7 +72,8 @@
             ],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "send asa to highest bidder"
         },
         {
             "name": "delete",
