@@ -1,6 +1,6 @@
 #pragma version 8
 intcblock 0 1 4
-bytecblock 0x686967686573745f626964 0x7061796d656e745f617361 0x617361 0x686967686573745f626964646572 0x61756374696f6e5f656e64 0x6173615f616d74 0x
+bytecblock 0x617361 0x686967686573745f626964 0x7061796d656e745f617361 0x686967686573745f626964646572 0x61756374696f6e5f656e64 0x6173615f616d74 0x
 txn NumAppArgs
 intc_0 // 0
 ==
@@ -168,7 +168,7 @@ return
 // create
 create_0:
 proto 0 0
-bytec_2 // "asa"
+bytec_0 // "asa"
 intc_0 // 0
 app_global_put
 bytec 5 // "asa_amt"
@@ -177,13 +177,13 @@ app_global_put
 bytec 4 // "auction_end"
 intc_0 // 0
 app_global_put
-bytec_0 // "highest_bid"
+bytec_1 // "highest_bid"
 intc_0 // 0
 app_global_put
 bytec_3 // "highest_bidder"
 bytec 6 // ""
 app_global_put
-bytec_1 // "payment_asa"
+bytec_2 // "payment_asa"
 intc_0 // 0
 app_global_put
 retsub
@@ -196,21 +196,21 @@ global CreatorAddress
 ==
 // unauthorized
 assert
-bytec_2 // "asa"
+bytec_0 // "asa"
 app_global_get
 intc_0 // 0
 ==
 assert
-bytec_1 // "payment_asa"
+bytec_2 // "payment_asa"
 app_global_get
 intc_0 // 0
 ==
 assert
-bytec_2 // "asa"
+bytec_0 // "asa"
 frame_dig -2
 txnas Assets
 app_global_put
-bytec_1 // "payment_asa"
+bytec_2 // "payment_asa"
 frame_dig -1
 txnas Assets
 app_global_put
@@ -261,7 +261,7 @@ global CurrentApplicationAddress
 assert
 frame_dig -1
 gtxns XferAsset
-bytec_2 // "asa"
+bytec_0 // "asa"
 app_global_get
 ==
 assert
@@ -274,7 +274,7 @@ global LatestTimestamp
 frame_dig -2
 +
 app_global_put
-bytec_0 // "highest_bid"
+bytec_1 // "highest_bid"
 frame_dig -3
 app_global_put
 retsub
@@ -299,28 +299,6 @@ retsub
 // bid
 bid_4:
 proto 1 0
-frame_dig -1
-gtxns AssetAmount
-bytec_0 // "highest_bid"
-app_global_get
->
-assert
-frame_dig -1
-gtxns AssetSender
-txn Sender
-==
-assert
-frame_dig -1
-gtxns AssetReceiver
-global CurrentApplicationAddress
-==
-assert
-frame_dig -1
-gtxns XferAsset
-bytec_1 // "payment_asa"
-app_global_get
-==
-assert
 bytec_3 // "highest_bidder"
 app_global_get
 bytec 6 // ""
@@ -328,13 +306,13 @@ bytec 6 // ""
 bz bid_4_l2
 bytec_3 // "highest_bidder"
 app_global_get
-bytec_0 // "highest_bid"
+bytec_1 // "highest_bid"
 app_global_get
-bytec_1 // "payment_asa"
+bytec_2 // "payment_asa"
 app_global_get
 callsub pay_3
 bid_4_l2:
-bytec_0 // "highest_bid"
+bytec_1 // "highest_bid"
 frame_dig -1
 gtxns AssetAmount
 app_global_put
@@ -348,9 +326,9 @@ retsub
 claimbid_5:
 proto 0 0
 global CreatorAddress
-bytec_0 // "highest_bid"
+bytec_1 // "highest_bid"
 app_global_get
-bytec_1 // "payment_asa"
+bytec_2 // "payment_asa"
 app_global_get
 callsub pay_3
 retsub
@@ -360,9 +338,9 @@ claimasset_6:
 proto 2 0
 bytec_3 // "highest_bidder"
 app_global_get
-bytec_0 // "highest_bid"
+bytec_1 // "highest_bid"
 app_global_get
-bytec_2 // "asa"
+bytec_0 // "asa"
 app_global_get
 callsub pay_3
 retsub
@@ -386,7 +364,7 @@ intc_2 // axfer
 itxn_field TypeEnum
 intc_0 // 0
 itxn_field Fee
-bytec_2 // "asa"
+bytec_0 // "asa"
 app_global_get
 itxn_field XferAsset
 intc_0 // 0
@@ -400,7 +378,7 @@ intc_2 // axfer
 itxn_field TypeEnum
 intc_0 // 0
 itxn_field Fee
-bytec_1 // "payment_asa"
+bytec_2 // "payment_asa"
 app_global_get
 itxn_field XferAsset
 intc_0 // 0

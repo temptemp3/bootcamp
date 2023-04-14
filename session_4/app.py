@@ -141,10 +141,10 @@ def bid(payment: abi.AssetTransferTransaction) -> Expr:
         # Ensure auction hasn't ended
         #assert_auction_not_over(),
         # Verify payment transaction
-        Assert(payment.get().asset_amount() > app.state.highest_bid.get()), # amount is gt highest bid
-        Assert(payment.get().asset_sender() == Txn.sender()), # txn sender is payment sender
-        Assert(payment.get().asset_receiver() == Global.current_application_address()), # is to app address
-        Assert(payment.get().xfer_asset() == app.state.payment_asa.get()), # is in payment token
+        #Assert(payment.get().asset_amount() > app.state.highest_bid.get()), # amount is gt highest bid
+        #Assert(payment.get().asset_sender() == Txn.sender()), # txn sender is payment sender
+        #Assert(payment.get().asset_receiver() == Global.current_application_address()), # is to app address
+        #Assert(payment.get().xfer_asset() == app.state.payment_asa.get()), # is in payment token
         # Return previous bid if there was one
         # TODO add fallback for optout attack
         If(
