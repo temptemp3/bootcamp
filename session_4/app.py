@@ -53,6 +53,8 @@ def create() -> Expr:
     return app.initialize_global_state()
 
 # Only allow app creator to opt the app account into a ASA
+
+
 @app.external(authorize=Authorize.only(Global.creator_address()))
 def opt_into_asset(asset: abi.Asset, payment_asset: abi.Asset) -> Expr:
     """ opt into assets """
@@ -65,7 +67,7 @@ def opt_into_asset(asset: abi.Asset, payment_asset: abi.Asset) -> Expr:
         app.state.asa.set(asset.asset_id()),
         # Save ASA ID in global state
         app.state.payment_asa.set(payment_asset.asset_id()),
-        
+
         # Submit opt-in transaction: 0 asset transfer to self
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields(
@@ -77,15 +79,16 @@ def opt_into_asset(asset: abi.Asset, payment_asset: abi.Asset) -> Expr:
                 TxnField.asset_amount: Int(0),
             },
         ),
-        InnerTxnBuilder.Next(),  # This indicates we're moving to constructing the next txn in the group
+        # This indicates we're moving to constructing the next txn in the group
+        InnerTxnBuilder.Next(),
         InnerTxnBuilder.SetFields(
-{
+            {
                 TxnField.type_enum: TxnType.AssetTransfer,
                 TxnField.fee: Int(0),  # cover fee with outer txn
                 TxnField.asset_receiver: Global.current_application_address(),
                 TxnField.xfer_asset: payment_asset.asset_id(),
                 TxnField.asset_amount: Int(0),
-            }    
+            }
         ),
         InnerTxnBuilder.Submit(),
     )
@@ -102,16 +105,20 @@ def start_auction(
         # Ensure the auction hasn't already been started
         Assert(app.state.auction_end.get() == Int(0)),
         # Verify axfer
-        Assert(axfer.get().asset_receiver() == Global.current_application_address()),
+        Assert(axfer.get().asset_receiver() ==
+               Global.current_application_address()),
         Assert(axfer.get().xfer_asset() == app.state.asa),
         # Set global state
         app.state.asa_amt.set(axfer.get().asset_amount()),
         app.state.auction_end.set(Global.latest_timestamp() + length.get()),
-        app.state.highest_bid.set(starting_price.get()), # what happens if no one bids
+        # what happens if no one bids
+        app.state.highest_bid.set(starting_price.get()),
     )
 
 # pay
 # - pay receiver amount in asset
+
+
 @Subroutine(TealType.none)
 def pay(receiver: Expr, amount: Expr, asset: Expr) -> Expr:
     """ pay asa """
@@ -125,100 +132,89 @@ def pay(receiver: Expr, amount: Expr, asset: Expr) -> Expr:
         }
     )
 
+
 @Subroutine(TealType.none)
 def assert_auction_not_over() -> Expr:
     """ auction not over """
     return Assert(Global.latest_timestamp() < app.state.auction_end.get())
+
 
 @Subroutine(TealType.none)
 def assert_auction_over() -> Expr:
     """ auction over """
     return not assert_auction_not_over()
 
+
 @app.external
-def bid(payment: abi.AssetTransferTransaction, previous_bidder: abi.Account) -> Expr:
+def bid(payment: abi.AssetTransferTransaction, asset: abi.Asset, previous_bidder: abi.Account) -> Expr:
     """ accept new bid """
     return Seq(
         # Ensure auction hasn't ended
-        #assert_auction_not_over(),
+        # assert_auction_not_over(),
         # Verify payment transaction
-        #Assert(payment.get().asset_amount() > app.state.highest_bid.get()), # amount is gt highest bid
-        #Assert(payment.get().asset_sender() == Txn.sender()), # txn sender is payment sender
-        #Assert(payment.get().asset_receiver() == Global.current_application_address()), # is to app address
-        #Assert(payment.get().xfer_asset() == app.state.payment_asa.get()), # is in payment token
+        # Assert(payment.get().asset_amount() > app.state.highest_bid.get()), # amount is gt highest bid
+        # Assert(payment.get().asset_sender() == Txn.sender()), # txn sender is payment sender
+        # Assert(payment.get().asset_receiver() == Global.current_application_address()), # is to app address
+        # Assert(payment.get().xfer_asset() == app.state.payment_asa.get()), # is in payment token
         # Return previous bid if there was one
         # TODO add fallback for optout attack
         If(
-            app.state.highest_bidder.get() != Bytes(""), # not sure if this works are if it is translated into the zero address
-            pay(app.state.highest_bidder.get(), app.state.highest_bid.get(), app.state.payment_asa.get()),
+            # not sure if this works are if it is translated into the zero address
+            app.state.highest_bidder.get() != Bytes(""),
+            pay(app.state.highest_bidder.get(),
+                app.state.highest_bid.get(), app.state.payment_asa.get()),
         ),
         # Set global state
-        app.state.highest_bid.set(payment.get().asset_amount()), # set new highest bid
-        app.state.highest_bidder.set(payment.get().sender()), # set new highest bidder
+        app.state.highest_bid.set(
+            payment.get().asset_amount()),  # set new highest bid
+        app.state.highest_bidder.set(
+            payment.get().sender()),  # set new highest bidder
     )
 
 
 @app.external
-def claim_bid() -> Expr:
+def claim_bid(payment_asset: abi.Asset, creator_address: abi.Account) -> Expr:
     """ send payment asas to creator """
     return Seq(
         # Auction end check is commented out for automated testing
-        #assert_auction_over(),
+        # assert_auction_over(),
         # Asset previous highest bidder not ""
-        pay(Global.creator_address(), app.state.highest_bid.get(), app.state.payment_asa.get())
+        InnerTxnBuilder.Execute(
+            {
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.fee: Int(0),  # cover fee with outer txn
+                TxnField.xfer_asset: app.state.payment_asa,
+                TxnField.asset_amount: app.state.highest_bid,
+                TxnField.asset_receiver: Global.creator_address(),
+                # close to creator address since it is guaranteed to be opted in to recdeive
+                TxnField.asset_close_to: Global.creator_address(),
+            }
+        ),
     )
 
 
-@app.external
-def claim_asset(asset: abi.Asset, asset_creator: abi.Account) -> Expr:
+@ app.external
+def claim_asset(asset: abi.Asset, highest_bidder: abi.Account, asset_creator: abi.Account) -> Expr:
     """ send asa to highest bidder  """
-    return Seq(
-        # Auction end check is commented out for automated testing
-        #assert_auction_over(),
-        # Send ASA to highest bidder
-        pay(app.state.highest_bidder.get(), app.state.highest_bid.get(), app.state.asa.get())
+    # Auction end check is commented out for automated testing
+    # assert_auction_over(),
+    # Send ASA to highest bidder
+    return InnerTxnBuilder.Execute(
+        {
+            TxnField.type_enum: TxnType.AssetTransfer,
+            TxnField.fee: Int(0),  # cover fee with outer txn
+            TxnField.xfer_asset: app.state.asa,
+            TxnField.asset_amount: app.state.asa_amt,
+            TxnField.asset_receiver: app.state.highest_bidder,
+            # close to asset creator since they are guranteed to be opted in
+            TxnField.asset_close_to: asset_creator.address()
+        }
     )
 
 
 @app.delete
 def delete() -> Expr:
-    """ delete app """
-    return Seq(
-        InnerTxnBuilder.Begin(),
-        InnerTxnBuilder.SetFields(
-            {
-                TxnField.type_enum: TxnType.Payment,
-                TxnField.fee: Int(0),  
-                TxnField.receiver: Global.creator_address(),
-                TxnField.close_remainder_to: Global.creator_address(),
-                TxnField.amount: Int(0),
-            }
-        ),
-        InnerTxnBuilder.Next(),  
-        InnerTxnBuilder.SetFields(
-            {
-                TxnField.type_enum: TxnType.AssetTransfer,
-                TxnField.fee: Int(0), 
-                TxnField.xfer_asset: app.state.asa.get(), ### !!!
-                TxnField.asset_amount: Int(0),
-                TxnField.asset_receiver: Global.creator_address(),
-                TxnField.asset_close_to: Global.creator_address(),
-            }
-        ),
-        InnerTxnBuilder.Next(),
-        InnerTxnBuilder.SetFields(
-            {
-                TxnField.type_enum: TxnType.AssetTransfer,
-                TxnField.fee: Int(0), 
-                TxnField.xfer_asset: app.state.payment_asa.get(), ### !!!
-                TxnField.asset_amount: Int(0),
-                TxnField.asset_receiver: Global.creator_address(),
-                TxnField.asset_close_to: Global.creator_address(),
-            }
-        ),
-        InnerTxnBuilder.Submit(),
-    )
-    InnerTxnBuilder.Execute(
+    return InnerTxnBuilder.Execute(
         {
             TxnField.type_enum: TxnType.Payment,
             TxnField.fee: Int(0),  # cover fee with outer txn

@@ -15,7 +15,8 @@
             ],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "opt into assets"
         },
         {
             "name": "start_auction",
@@ -35,7 +36,8 @@
             ],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "start auction"
         },
         {
             "name": "bid",
@@ -43,6 +45,14 @@
                 {
                     "type": "axfer",
                     "name": "payment"
+                },
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "account",
+                    "name": "previous_bidder"
                 }
             ],
             "returns": {
@@ -52,7 +62,16 @@
         },
         {
             "name": "claim_bid",
-            "args": [],
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "payment_asset"
+                },
+                {
+                    "type": "account",
+                    "name": "creator_address"
+                }
+            ],
             "returns": {
                 "type": "void"
             },
@@ -64,6 +83,10 @@
                 {
                     "type": "asset",
                     "name": "asset"
+                },
+                {
+                    "type": "account",
+                    "name": "highest_bidder"
                 },
                 {
                     "type": "account",
