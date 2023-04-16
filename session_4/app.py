@@ -223,7 +223,7 @@ def delete() -> Expr:
             TxnField.close_remainder_to: Global.creator_address(),
             # we are closing the account, so amount can be zero
             TxnField.amount: Int(0),
-        }
+        },
     )
 
 
