@@ -97,6 +97,13 @@
                 "type": "void"
             },
             "desc": "send asa to highest bidder"
+        },
+        {
+            "name": "delete",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
         }
     ],
     "networks": {}

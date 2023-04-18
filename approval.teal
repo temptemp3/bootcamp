@@ -4,29 +4,45 @@ bytecblock 0x617361 0x686967686573745f626964 0x686967686573745f626964646572 0x70
 txn NumAppArgs
 intc_0 // 0
 ==
-bnz main_l12
+bnz main_l14
 txna ApplicationArgs 0
 pushbytes 0x82498b4a // "opt_into_asset(asset,asset)void"
 ==
-bnz main_l11
+bnz main_l13
 txna ApplicationArgs 0
 pushbytes 0xf0aa7023 // "start_auction(uint64,uint64,axfer)void"
 ==
-bnz main_l10
+bnz main_l12
 txna ApplicationArgs 0
 pushbytes 0x2cbe339c // "bid(axfer,asset,account)void"
 ==
-bnz main_l9
+bnz main_l11
 txna ApplicationArgs 0
 pushbytes 0x6e629e02 // "claim_bid(asset,account)void"
 ==
-bnz main_l8
+bnz main_l10
 txna ApplicationArgs 0
 pushbytes 0x14712534 // "claim_asset(asset,account,account)void"
 ==
-bnz main_l7
+bnz main_l9
+txna ApplicationArgs 0
+pushbytes 0x24378d3c // "delete()void"
+==
+bnz main_l8
 err
-main_l7:
+main_l8:
+txn OnCompletion
+pushint 5 // DeleteApplication
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub delete_7
+intc_1 // 1
+return
+main_l9:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -53,7 +69,7 @@ load 12
 callsub claimasset_6
 intc_1 // 1
 return
-main_l8:
+main_l10:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -75,7 +91,7 @@ load 9
 callsub claimbid_5
 intc_1 // 1
 return
-main_l9:
+main_l11:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -107,7 +123,7 @@ load 7
 callsub bid_4
 intc_1 // 1
 return
-main_l10:
+main_l12:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -137,7 +153,7 @@ load 4
 callsub startauction_2
 intc_1 // 1
 return
-main_l11:
+main_l13:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -159,24 +175,12 @@ load 1
 callsub optintoasset_1
 intc_1 // 1
 return
-main_l12:
+main_l14:
 txn OnCompletion
 intc_0 // NoOp
 ==
 bnz main_l16
-txn OnCompletion
-pushint 5 // DeleteApplication
-==
-bnz main_l15
 err
-main_l15:
-txn ApplicationID
-intc_0 // 0
-!=
-assert
-callsub delete_7
-intc_1 // 1
-return
 main_l16:
 txn ApplicationID
 intc_0 // 0
@@ -390,11 +394,6 @@ retsub
 // delete
 delete_7:
 proto 0 0
-txn Sender
-global CreatorAddress
-==
-// unauthorized
-assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
