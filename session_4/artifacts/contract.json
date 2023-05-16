@@ -2,23 +2,6 @@
     "name": "Auction",
     "methods": [
         {
-            "name": "opt_into_asset",
-            "args": [
-                {
-                    "type": "asset",
-                    "name": "asset"
-                },
-                {
-                    "type": "asset",
-                    "name": "payment_asset"
-                }
-            ],
-            "returns": {
-                "type": "void"
-            },
-            "desc": "opt into assets"
-        },
-        {
             "name": "start_auction",
             "args": [
                 {
@@ -38,6 +21,23 @@
                 "type": "void"
             },
             "desc": "start auction"
+        },
+        {
+            "name": "opt_into_asset",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "asset",
+                    "name": "payment_asset"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "opt into assets"
         },
         {
             "name": "bid",
@@ -97,6 +97,35 @@
                 "type": "void"
             },
             "desc": "send asa to highest bidder"
+        },
+        {
+            "name": "claim_asset_no_bid",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "asset",
+                    "name": "payment_asset"
+                },
+                {
+                    "type": "account",
+                    "name": "app_creator"
+                },
+                {
+                    "type": "account",
+                    "name": "asset_creator"
+                },
+                {
+                    "type": "account",
+                    "name": "payment_asset_creator"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "send asa back to initiator of auction in case of no bid"
         },
         {
             "name": "delete",
