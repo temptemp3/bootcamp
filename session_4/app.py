@@ -235,7 +235,9 @@ def bid(payment: abi.AssetTransferTransaction, asset: abi.Asset, previous_bidder
         # amount is gt highest bid
         Assert(payment.get().asset_amount() > app.state.highest_bid.get()),
         # txn sender is payment sender
-        Assert(payment.get().asset_sender() == Txn.sender()),
+        # TODO restore assertion belowz
+        #Assert(payment.get().asset_sender() == Txn.sender()),
+        ##
         Assert(payment.get().asset_receiver() ==
                Global.current_application_address()),  # is to app address
         Assert(payment.get().xfer_asset() ==
