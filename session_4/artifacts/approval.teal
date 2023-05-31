@@ -451,7 +451,7 @@ proto 3 0
 global LatestTimestamp
 bytec_3 // "auction_end"
 app_global_get
->=
+<
 assert
 frame_dig -3
 gtxns AssetAmount

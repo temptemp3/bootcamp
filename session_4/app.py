@@ -230,7 +230,7 @@ def bid(payment: abi.AssetTransferTransaction, asset: abi.Asset, previous_bidder
     """ accept new bid """
     return Seq(
         # Ensure auction hasn't ended
-        Assert(Global.latest_timestamp() >= app.state.auction_end.get()),
+        Assert(Global.latest_timestamp() < app.state.auction_end.get()),
         # Verify payment transaction
         # amount is gt highest bid
         Assert(payment.get().asset_amount() > app.state.highest_bid.get()),
