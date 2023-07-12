@@ -1,0 +1,117 @@
+{
+    "name": "Sale",
+    "methods": [
+        {
+            "name": "opt_into_asset",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "asset",
+                    "name": "payment_asset"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "opt into assets"
+        },
+        {
+            "name": "start_sale",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "price"
+                },
+                {
+                    "type": "axfer",
+                    "name": "axfer"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "start sale"
+        },
+        {
+            "name": "claim_asset",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "asset_amount"
+                },
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "asset",
+                    "name": "payment_asset"
+                },
+                {
+                    "type": "account",
+                    "name": "app_creator"
+                },
+                {
+                    "type": "account",
+                    "name": "asset_creator"
+                },
+                {
+                    "type": "account",
+                    "name": "payment_asset_creator"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "send asa back to initiator of sale in case of no purchase"
+        },
+        {
+            "name": "delete",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "buy",
+            "args": [
+                {
+                    "type": "axfer",
+                    "name": "payment"
+                },
+                {
+                    "type": "uint64",
+                    "name": "asset_amount"
+                },
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "asset",
+                    "name": "payment_asset"
+                },
+                {
+                    "type": "account",
+                    "name": "app_creator"
+                },
+                {
+                    "type": "account",
+                    "name": "asset_creator"
+                },
+                {
+                    "type": "account",
+                    "name": "payment_asset_creator"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "accept purchase"
+        }
+    ],
+    "networks": {}
+}
