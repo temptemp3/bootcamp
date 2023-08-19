@@ -1,32 +1,36 @@
 #pragma version 8
 intcblock 0 1 4
-bytecblock 0x617361 0x7061796d656e745f617361 0x6173615f616d74 0x73616c655f7374617274 0x73616c655f7072696365
+bytecblock 0x617361 0x7061796d656e745f617361 0x73616c655f7072696365 0x73616c655f7374617274 0x6173615f616d74
 txn NumAppArgs
 intc_0 // 0
 ==
-bnz main_l12
+bnz main_l14
 txna ApplicationArgs 0
 pushbytes 0x82498b4a // "opt_into_asset(asset,asset)void"
 ==
-bnz main_l11
+bnz main_l13
 txna ApplicationArgs 0
 pushbytes 0x7d39cca9 // "start_sale(uint64,axfer)void"
 ==
-bnz main_l10
+bnz main_l12
 txna ApplicationArgs 0
 pushbytes 0x23a973b6 // "claim_asset(uint64,asset,asset,account,account,account)void"
 ==
-bnz main_l9
+bnz main_l11
 txna ApplicationArgs 0
 pushbytes 0x24378d3c // "delete()void"
 ==
-bnz main_l8
+bnz main_l10
+txna ApplicationArgs 0
+pushbytes 0xd380c4f0 // "update(uint64)void"
+==
+bnz main_l9
 txna ApplicationArgs 0
 pushbytes 0x0154b325 // "buy(axfer,uint64,asset,asset,account,account,account)void"
 ==
-bnz main_l7
+bnz main_l8
 err
-main_l7:
+main_l8:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -74,10 +78,24 @@ load 13
 load 14
 load 15
 load 16
-callsub buy_9
+callsub buy_10
 intc_1 // 1
 return
-main_l8:
+main_l9:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+btoi
+callsub update_9
+intc_1 // 1
+return
+main_l10:
 txn OnCompletion
 pushint 5 // DeleteApplication
 ==
@@ -89,7 +107,7 @@ assert
 callsub delete_8
 intc_1 // 1
 return
-main_l9:
+main_l11:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -130,7 +148,7 @@ load 9
 callsub claimasset_7
 intc_1 // 1
 return
-main_l10:
+main_l12:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -156,7 +174,7 @@ load 3
 callsub startsale_6
 intc_1 // 1
 return
-main_l11:
+main_l13:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -178,13 +196,13 @@ load 1
 callsub optintoasset_5
 intc_1 // 1
 return
-main_l12:
+main_l14:
 txn OnCompletion
 intc_0 // NoOp
 ==
-bnz main_l14
+bnz main_l16
 err
-main_l14:
+main_l16:
 txn ApplicationID
 intc_0 // 0
 ==
@@ -263,13 +281,13 @@ proto 0 0
 bytec_0 // "asa"
 intc_0 // 0
 app_global_put
-bytec_2 // "asa_amt"
+bytec 4 // "asa_amt"
 intc_0 // 0
 app_global_put
 bytec_1 // "payment_asa"
 intc_0 // 0
 app_global_put
-bytec 4 // "sale_price"
+bytec_2 // "sale_price"
 intc_0 // 0
 app_global_put
 bytec_3 // "sale_start"
@@ -342,12 +360,12 @@ app_global_get
 intc_0 // 0
 ==
 assert
-bytec 4 // "sale_price"
+bytec_2 // "sale_price"
 app_global_get
 intc_0 // 0
 ==
 assert
-bytec_2 // "asa_amt"
+bytec 4 // "asa_amt"
 app_global_get
 intc_0 // 0
 ==
@@ -370,10 +388,10 @@ assert
 bytec_3 // "sale_start"
 global LatestTimestamp
 app_global_put
-bytec 4 // "sale_price"
+bytec_2 // "sale_price"
 frame_dig -2
 app_global_put
-bytec_2 // "asa_amt"
+bytec 4 // "asa_amt"
 frame_dig -1
 gtxns AssetAmount
 app_global_put
@@ -387,7 +405,7 @@ app_global_get
 intc_0 // 0
 !=
 assert
-bytec_2 // "asa_amt"
+bytec 4 // "asa_amt"
 app_global_get
 intc_0 // 0
 !=
@@ -397,12 +415,12 @@ app_global_get
 intc_0 // 0
 !=
 assert
-bytec 4 // "sale_price"
+bytec_2 // "sale_price"
 app_global_get
 intc_0 // 0
 !=
 assert
-bytec_2 // "asa_amt"
+bytec 4 // "asa_amt"
 app_global_get
 frame_dig -6
 ==
@@ -427,13 +445,13 @@ assert
 bytec_0 // "asa"
 intc_0 // 0
 app_global_put
-bytec_2 // "asa_amt"
+bytec 4 // "asa_amt"
 intc_0 // 0
 app_global_put
 bytec_1 // "payment_asa"
 intc_0 // 0
 app_global_put
-bytec 4 // "sale_price"
+bytec_2 // "sale_price"
 intc_0 // 0
 app_global_put
 bytec_3 // "sale_start"
@@ -467,8 +485,33 @@ callsub freeappmbr_1
 itxn_submit
 retsub
 
+// update
+update_9:
+proto 1 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+bytec_2 // "sale_price"
+app_global_get
+intc_0 // 0
+!=
+assert
+frame_dig -1
+intc_0 // 0
+>
+assert
+bytec_3 // "sale_start"
+global LatestTimestamp
+app_global_put
+bytec_2 // "sale_price"
+frame_dig -1
+app_global_put
+retsub
+
 // buy
-buy_9:
+buy_10:
 proto 7 0
 frame_dig -3
 txnas Accounts
@@ -481,7 +524,7 @@ frame_dig -5
 txnas Assets
 ==
 assert
-bytec_2 // "asa_amt"
+bytec 4 // "asa_amt"
 app_global_get
 frame_dig -6
 ==
@@ -498,7 +541,7 @@ frame_dig -7
 gtxns XferAsset
 ==
 assert
-bytec 4 // "sale_price"
+bytec_2 // "sale_price"
 app_global_get
 frame_dig -7
 gtxns AssetAmount
@@ -513,13 +556,13 @@ assert
 bytec_0 // "asa"
 intc_0 // 0
 app_global_put
-bytec_2 // "asa_amt"
+bytec 4 // "asa_amt"
 intc_0 // 0
 app_global_put
 bytec_1 // "payment_asa"
 intc_0 // 0
 app_global_put
-bytec 4 // "sale_price"
+bytec_2 // "sale_price"
 intc_0 // 0
 app_global_put
 bytec_3 // "sale_start"

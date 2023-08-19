@@ -268,9 +268,22 @@ def delete() -> Expr:
     )
 
 # fees:
+
+@app.external(authorize=Authorize.only(Global.creator_address()))
+def update(price: abi.Uint64) -> Expr:
+    """ update price """
+    return Seq(
+        ## Assertions
+        Assert(app.state.sale_price.get() != Int(0)),
+        Assert(price.get() > Int(0)),
+        ## State update (set)
+        app.state.sale_start.set(Global.latest_timestamp()),
+        app.state.sale_price.set(price.get()),
+    )
+
+# fees:
 # - requires fee 0.004A
 # on complete:
-
 
 @app.external
 def buy(payment: abi.AssetTransferTransaction, asset_amount: abi.Uint64, asset: abi.Asset, payment_asset: abi.Asset, app_creator: abi.Account, asset_creator: abi.Account, payment_asset_creator: abi.Account) -> Expr:

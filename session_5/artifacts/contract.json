@@ -76,6 +76,19 @@
             }
         },
         {
+            "name": "update",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "price"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "update price"
+        },
+        {
             "name": "buy",
             "args": [
                 {
