@@ -1,6 +1,6 @@
 #pragma version 8
 intcblock 0 1 4
-bytecblock 0x6d616e61676572 0x 0x75726c 0x72657365727665 0x6e6f7465
+bytecblock 0x6d616e61676572 0x 0x6e6f7465 0x72657365727665 0x75726c
 txn NumAppArgs
 intc_0 // 0
 ==
@@ -228,13 +228,13 @@ proto 0 0
 bytec_0 // "manager"
 global CreatorAddress
 app_global_put
-bytec 4 // "note"
+bytec_2 // "note"
 bytec_1 // ""
 app_global_put
 bytec_3 // "reserve"
 global CreatorAddress
 app_global_put
-bytec_2 // "url"
+bytec 4 // "url"
 bytec_1 // ""
 app_global_put
 retsub
@@ -248,12 +248,12 @@ app_global_get
 ==
 // unauthorized
 assert
-bytec_2 // "url"
+bytec 4 // "url"
 app_global_get
 bytec_1 // ""
 ==
 assert
-bytec 4 // "note"
+bytec_2 // "note"
 app_global_get
 bytec_1 // ""
 ==
@@ -263,10 +263,10 @@ app_global_get
 global CreatorAddress
 ==
 assert
-bytec_2 // "url"
+bytec 4 // "url"
 frame_dig -3
 app_global_put
-bytec_2 // "url"
+bytec_2 // "note"
 frame_dig -1
 app_global_put
 bytec_3 // "reserve"

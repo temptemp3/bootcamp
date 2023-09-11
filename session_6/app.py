@@ -128,7 +128,7 @@ def mint(url: abi.String, reserve: abi.Account, note: abi.String) -> Expr:
         # state update
         ##########################################
         app.state.url.set(url.encode()),
-        app.state.url.set(note.encode()),
+        app.state.note.set(note.encode()),
         app.state.reserve.set(reserve.address()),
         ##########################################
     )
