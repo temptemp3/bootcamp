@@ -278,12 +278,6 @@ retsub
 // opt_in_asset
 optinasset_6:
 proto 1 0
-txn Sender
-bytec_0 // "manager"
-app_global_get
-==
-// unauthorized
-assert
 itxn_begin
 frame_dig -1
 txnas Assets
@@ -340,6 +334,12 @@ retsub
 // delete
 delete_10:
 proto 0 0
+txn Sender
+bytec_0 // "manager"
+app_global_get
+==
+// unauthorized
+assert
 itxn_begin
 callsub freeappmbr_1
 itxn_submit

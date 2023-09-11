@@ -136,7 +136,7 @@ def mint(url: abi.String, reserve: abi.Account, note: abi.String) -> Expr:
 # fees:
 # - requires fee 0.002A
 
-@app.external(authorize=Authorize.only(app.state.manager.get()))
+@app.external
 def opt_in_asset(asset: abi.Asset) -> Expr:
     """ opt in assets """
     return Seq(
@@ -203,8 +203,7 @@ def grant(manager: abi.Account) -> Expr:
 # on complete:
 # - requires DeleteApplicationOC
 
-
-@app.delete
+@app.delete(authorize=Authorize.only(app.state.manager.get()))
 def delete() -> Expr:
     return Seq(
         ###############################################
