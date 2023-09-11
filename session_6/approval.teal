@@ -1,0 +1,518 @@
+#pragma version 8
+intcblock 0 1 4
+bytecblock 0x686967686573745f626964646572 0x617361 0x686967686573745f626964 0x7061796d656e745f617361 0x61756374696f6e5f656e64 0x6173615f616d74 0x
+txn NumAppArgs
+intc_0 // 0
+==
+bnz main_l16
+txna ApplicationArgs 0
+pushbytes 0xf0aa7023 // "start_auction(uint64,uint64,axfer)void"
+==
+bnz main_l15
+txna ApplicationArgs 0
+pushbytes 0x82498b4a // "opt_into_asset(asset,asset)void"
+==
+bnz main_l14
+txna ApplicationArgs 0
+pushbytes 0x2cbe339c // "bid(axfer,asset,account)void"
+==
+bnz main_l13
+txna ApplicationArgs 0
+pushbytes 0x6e629e02 // "claim_bid(asset,account)void"
+==
+bnz main_l12
+txna ApplicationArgs 0
+pushbytes 0x14712534 // "claim_asset(asset,account,account)void"
+==
+bnz main_l11
+txna ApplicationArgs 0
+pushbytes 0x94e61a29 // "claim_asset_no_bid(asset,account,account)void"
+==
+bnz main_l10
+txna ApplicationArgs 0
+pushbytes 0x24378d3c // "delete()void"
+==
+bnz main_l9
+err
+main_l9:
+txn OnCompletion
+pushint 5 // DeleteApplication
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub delete_11
+intc_1 // 1
+return
+main_l10:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+store 13
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+store 14
+txna ApplicationArgs 3
+intc_0 // 0
+getbyte
+store 15
+load 13
+load 14
+load 15
+callsub claimassetnobid_10
+intc_1 // 1
+return
+main_l11:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+store 10
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+store 11
+txna ApplicationArgs 3
+intc_0 // 0
+getbyte
+store 12
+load 10
+load 11
+load 12
+callsub claimasset_9
+intc_1 // 1
+return
+main_l12:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+store 8
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+store 9
+load 8
+load 9
+callsub claimbid_8
+intc_1 // 1
+return
+main_l13:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+store 6
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+store 7
+txn GroupIndex
+intc_1 // 1
+-
+store 5
+load 5
+gtxns TypeEnum
+intc_2 // axfer
+==
+assert
+load 5
+load 6
+load 7
+callsub bid_7
+intc_1 // 1
+return
+main_l14:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+store 3
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+store 4
+load 3
+load 4
+callsub optintoasset_6
+intc_1 // 1
+return
+main_l15:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+btoi
+store 0
+txna ApplicationArgs 2
+btoi
+store 1
+txn GroupIndex
+intc_1 // 1
+-
+store 2
+load 2
+gtxns TypeEnum
+intc_2 // axfer
+==
+assert
+load 0
+load 1
+load 2
+callsub startauction_4
+intc_1 // 1
+return
+main_l16:
+txn OnCompletion
+intc_0 // NoOp
+==
+bnz main_l18
+err
+main_l18:
+txn ApplicationID
+intc_0 // 0
+==
+assert
+callsub create_5
+intc_1 // 1
+return
+
+// pay
+pay_0:
+proto 3 0
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+frame_dig -3
+itxn_field AssetReceiver
+frame_dig -2
+itxn_field AssetAmount
+frame_dig -1
+itxn_field XferAsset
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+retsub
+
+// assert_auction_not_over
+assertauctionnotover_1:
+proto 0 0
+global LatestTimestamp
+bytec 4 // "auction_end"
+app_global_get
+<
+assert
+retsub
+
+// assert_auction_over
+assertauctionover_2:
+proto 0 0
+global LatestTimestamp
+bytec 4 // "auction_end"
+app_global_get
+>=
+assert
+retsub
+
+// assert_has_bid
+asserthasbid_3:
+proto 0 0
+bytec_0 // "highest_bidder"
+app_global_get
+bytec 6 // ""
+!=
+assert
+retsub
+
+// start_auction
+startauction_4:
+proto 3 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+bytec 4 // "auction_end"
+app_global_get
+intc_0 // 0
+==
+assert
+frame_dig -1
+gtxns AssetReceiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -1
+gtxns XferAsset
+bytec_1 // "asa"
+app_global_get
+==
+assert
+bytec 5 // "asa_amt"
+frame_dig -1
+gtxns AssetAmount
+app_global_put
+bytec 4 // "auction_end"
+global LatestTimestamp
+frame_dig -2
++
+app_global_put
+bytec_2 // "highest_bid"
+frame_dig -3
+app_global_put
+retsub
+
+// create
+create_5:
+proto 0 0
+bytec_1 // "asa"
+intc_0 // 0
+app_global_put
+bytec 5 // "asa_amt"
+intc_0 // 0
+app_global_put
+bytec 4 // "auction_end"
+intc_0 // 0
+app_global_put
+bytec_2 // "highest_bid"
+intc_0 // 0
+app_global_put
+bytec_0 // "highest_bidder"
+bytec 6 // ""
+app_global_put
+bytec_3 // "payment_asa"
+intc_0 // 0
+app_global_put
+retsub
+
+// opt_into_asset
+optintoasset_6:
+proto 2 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+bytec_1 // "asa"
+app_global_get
+intc_0 // 0
+==
+assert
+bytec_3 // "payment_asa"
+app_global_get
+intc_0 // 0
+==
+assert
+bytec_1 // "asa"
+frame_dig -2
+txnas Assets
+app_global_put
+bytec_3 // "payment_asa"
+frame_dig -1
+txnas Assets
+app_global_put
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+frame_dig -2
+txnas Assets
+itxn_field XferAsset
+intc_0 // 0
+itxn_field AssetAmount
+itxn_next
+intc_2 // axfer
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+frame_dig -1
+txnas Assets
+itxn_field XferAsset
+intc_0 // 0
+itxn_field AssetAmount
+itxn_submit
+retsub
+
+// bid
+bid_7:
+proto 3 0
+callsub assertauctionnotover_1
+frame_dig -3
+gtxns AssetAmount
+bytec_2 // "highest_bid"
+app_global_get
+>
+assert
+frame_dig -3
+gtxns AssetSender
+txn Sender
+==
+assert
+frame_dig -3
+gtxns AssetReceiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -3
+gtxns XferAsset
+bytec_3 // "payment_asa"
+app_global_get
+==
+assert
+bytec_0 // "highest_bidder"
+app_global_get
+bytec 6 // ""
+!=
+bz bid_7_l2
+bytec_0 // "highest_bidder"
+app_global_get
+bytec_2 // "highest_bid"
+app_global_get
+bytec_3 // "payment_asa"
+app_global_get
+callsub pay_0
+bid_7_l2:
+bytec_2 // "highest_bid"
+frame_dig -3
+gtxns AssetAmount
+app_global_put
+bytec_0 // "highest_bidder"
+frame_dig -3
+gtxns Sender
+app_global_put
+retsub
+
+// claim_bid
+claimbid_8:
+proto 2 0
+callsub assertauctionover_2
+callsub asserthasbid_3
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec_3 // "payment_asa"
+app_global_get
+itxn_field XferAsset
+bytec_2 // "highest_bid"
+app_global_get
+itxn_field AssetAmount
+global CreatorAddress
+itxn_field AssetReceiver
+global CreatorAddress
+itxn_field AssetCloseTo
+itxn_submit
+retsub
+
+// claim_asset
+claimasset_9:
+proto 3 0
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec_1 // "asa"
+app_global_get
+itxn_field XferAsset
+bytec 5 // "asa_amt"
+app_global_get
+itxn_field AssetAmount
+bytec_0 // "highest_bidder"
+app_global_get
+itxn_field AssetReceiver
+frame_dig -1
+txnas Accounts
+itxn_field AssetCloseTo
+itxn_submit
+retsub
+
+// claim_asset_no_bid
+claimassetnobid_10:
+proto 3 0
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec_1 // "asa"
+app_global_get
+itxn_field XferAsset
+bytec 5 // "asa_amt"
+app_global_get
+itxn_field AssetAmount
+bytec_0 // "highest_bidder"
+app_global_get
+itxn_field AssetReceiver
+frame_dig -1
+txnas Accounts
+itxn_field AssetCloseTo
+itxn_submit
+retsub
+
+// delete
+delete_11:
+proto 0 0
+itxn_begin
+intc_1 // pay
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+global CreatorAddress
+itxn_field Receiver
+global CreatorAddress
+itxn_field CloseRemainderTo
+intc_0 // 0
+itxn_field Amount
+itxn_submit
+retsub

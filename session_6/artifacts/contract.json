@@ -1,0 +1,85 @@
+{
+    "name": "Rollup",
+    "methods": [
+        {
+            "name": "mint",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "url"
+                },
+                {
+                    "type": "account",
+                    "name": "reserve"
+                },
+                {
+                    "type": "string",
+                    "name": "note"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "opt in assets"
+        },
+        {
+            "name": "opt_out_asset",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "account",
+                    "name": "asset_receiver"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "opt in assets"
+        },
+        {
+            "name": "withdraw",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "uint64",
+                    "name": "asset_amount"
+                },
+                {
+                    "type": "account",
+                    "name": "asset_receiver"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "opt in assets"
+        },
+        {
+            "name": "grant",
+            "args": [
+                {
+                    "type": "account",
+                    "name": "manager"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "update manager"
+        },
+        {
+            "name": "delete",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        }
+    ],
+    "networks": {}
+}

@@ -1,0 +1,131 @@
+{
+    "name": "Auction",
+    "methods": [
+        {
+            "name": "start_auction",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "starting_price"
+                },
+                {
+                    "type": "uint64",
+                    "name": "length"
+                },
+                {
+                    "type": "axfer",
+                    "name": "axfer"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "start auction"
+        },
+        {
+            "name": "opt_into_asset",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "asset",
+                    "name": "payment_asset"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "opt into assets"
+        },
+        {
+            "name": "bid",
+            "args": [
+                {
+                    "type": "axfer",
+                    "name": "payment"
+                },
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "account",
+                    "name": "previous_bidder"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "accept new bid"
+        },
+        {
+            "name": "claim_bid",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "payment_asset"
+                },
+                {
+                    "type": "account",
+                    "name": "creator_address"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "send payment asas to creator"
+        },
+        {
+            "name": "claim_asset",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "account",
+                    "name": "highest_bidder"
+                },
+                {
+                    "type": "account",
+                    "name": "asset_creator"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "send asa to highest bidder"
+        },
+        {
+            "name": "claim_asset_no_bid",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "account",
+                    "name": "highest_bidder"
+                },
+                {
+                    "type": "account",
+                    "name": "asset_creator"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "send asa back to initiator of auction in case of no bid"
+        },
+        {
+            "name": "delete",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        }
+    ],
+    "networks": {}
+}
