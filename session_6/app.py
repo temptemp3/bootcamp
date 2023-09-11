@@ -116,12 +116,13 @@ def create() -> Expr:
 
 @app.external(authorize=Authorize.only(app.state.manager.get()))
 def mint(url: abi.String, reserve: abi.Account, note: abi.String) -> Expr:
-    """ opt in assets """
+    """ mint smart nft """
     return Seq(
         ##########################################
         # assertions
         ##########################################
         Assert(app.state.url.get() == Bytes("")),
+        Assert(app.state.note.get() == Bytes("")),
         Assert(app.state.reserve.get() == Global.creator_address()),
         ##########################################
         # state update
@@ -135,9 +136,7 @@ def mint(url: abi.String, reserve: abi.Account, note: abi.String) -> Expr:
 # fees:
 # - requires fee 0.002A
 
-# @app.external(authorize=Authorize.only(app.state.manager.get()))
-
-
+@app.external(authorize=Authorize.only(app.state.manager.get()))
 def opt_in_asset(asset: abi.Asset) -> Expr:
     """ opt in assets """
     return Seq(
@@ -154,7 +153,7 @@ def opt_in_asset(asset: abi.Asset) -> Expr:
 # - requires fee 0.002A
 
 
-@app.external(authorize=Authorize.only(app.state.manager.get()))
+@app.external
 def opt_out_asset(asset: abi.Asset, asset_receiver: abi.Account) -> Expr:
     """ opt in assets """
     return Seq(

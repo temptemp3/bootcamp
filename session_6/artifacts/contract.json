@@ -20,6 +20,19 @@
             "returns": {
                 "type": "void"
             },
+            "desc": "mint smart nft"
+        },
+        {
+            "name": "opt_in_asset",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
             "desc": "opt in assets"
         },
         {
