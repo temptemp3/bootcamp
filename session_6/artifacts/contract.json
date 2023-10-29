@@ -15,6 +15,10 @@
                 {
                     "type": "string",
                     "name": "note"
+                },
+                {
+                    "type": "asset",
+                    "name": "asset"
                 }
             ],
             "returns": {

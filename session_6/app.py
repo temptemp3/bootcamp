@@ -29,6 +29,11 @@ class RollupState:
         default=pt.Bytes(""),
         descr="Note"
     )
+    token_id: Final[GlobalStateValue] = GlobalStateValue(
+        stack_type=TealType.uint64,
+        default=Int(0),
+        descr="Token Id"
+    )
 
 
 app = Application("Rollup", state=RollupState)
@@ -107,7 +112,6 @@ def opt_out(asset_id: Expr, close_remainder_to: Expr) -> Expr:
         },
     )
 
-
 @app.create(bare=True)
 def create() -> Expr:
     # Set all global state to the default values
@@ -115,7 +119,7 @@ def create() -> Expr:
 
 
 @app.external(authorize=Authorize.only(app.state.manager.get()))
-def mint(url: abi.String, reserve: abi.Account, note: abi.String) -> Expr:
+def mint(url: abi.String, reserve: abi.Account, note: abi.String, asset: abi.Asset) -> Expr:
     """ mint smart nft """
     return Seq(
         ##########################################
@@ -124,12 +128,20 @@ def mint(url: abi.String, reserve: abi.Account, note: abi.String) -> Expr:
         Assert(app.state.url.get() == Bytes("")),
         Assert(app.state.note.get() == Bytes("")),
         Assert(app.state.reserve.get() == Global.creator_address()),
+        Assert(app.state.token_id.get() == Int(0)),
+        ##########################################
+        # inner txns
+        ##########################################
+        InnerTxnBuilder.Begin(),
+        opt_in(asset.asset_id()),
+        InnerTxnBuilder.Submit(), 
         ##########################################
         # state update
         ##########################################
         app.state.url.set(url.encode()),
         app.state.note.set(note.encode()),
         app.state.reserve.set(reserve.address()),
+        app.state.token_id.set(asset.asset_id()),
         ##########################################
     )
 
@@ -158,6 +170,10 @@ def opt_out_asset(asset: abi.Asset, asset_receiver: abi.Account) -> Expr:
     """ opt in assets """
     return Seq(
         ##########################################
+        # assertions
+        ##########################################
+        Assert(app.state.token_id.get() != asset.asset_id()),
+        ##########################################
         # inner txns
         ##########################################
         InnerTxnBuilder.Begin(),
@@ -169,11 +185,14 @@ def opt_out_asset(asset: abi.Asset, asset_receiver: abi.Account) -> Expr:
 # fees:
 # - requires fee 0.002A
 
-
 @app.external(authorize=Authorize.only(app.state.manager.get()))
 def withdraw(asset: abi.Asset, asset_amount: abi.Uint64, asset_receiver: abi.Account) -> Expr:
     """ opt in assets """
     return Seq(
+        ##########################################
+        # assertions
+        ##########################################
+        Assert(app.state.token_id.get() != asset.asset_id()),
         ##########################################
         # inner txns
         ##########################################

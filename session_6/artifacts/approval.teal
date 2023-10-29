@@ -1,12 +1,12 @@
 #pragma version 8
 intcblock 0 1 4
-bytecblock 0x6d616e61676572 0x 0x6e6f7465 0x72657365727665 0x75726c
+bytecblock 0x6d616e61676572 0x 0x746f6b656e5f6964 0x6e6f7465 0x72657365727665 0x75726c
 txn NumAppArgs
 intc_0 // 0
 ==
 bnz main_l14
 txna ApplicationArgs 0
-pushbytes 0xe8992ba4 // "mint(string,account,string)void"
+pushbytes 0xca566102 // "mint(string,account,string,asset)void"
 ==
 bnz main_l13
 txna ApplicationArgs 0
@@ -39,7 +39,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub delete_10
+callsub deletecaster_16
 intc_1 // 1
 return
 main_l9:
@@ -51,10 +51,7 @@ intc_0 // 0
 !=
 &&
 assert
-txna ApplicationArgs 1
-intc_0 // 0
-getbyte
-callsub grant_9
+callsub grantcaster_15
 intc_1 // 1
 return
 main_l10:
@@ -66,21 +63,7 @@ intc_0 // 0
 !=
 &&
 assert
-txna ApplicationArgs 1
-intc_0 // 0
-getbyte
-store 5
-txna ApplicationArgs 2
-btoi
-store 6
-txna ApplicationArgs 3
-intc_0 // 0
-getbyte
-store 7
-load 5
-load 6
-load 7
-callsub withdraw_8
+callsub withdrawcaster_14
 intc_1 // 1
 return
 main_l11:
@@ -92,17 +75,7 @@ intc_0 // 0
 !=
 &&
 assert
-txna ApplicationArgs 1
-intc_0 // 0
-getbyte
-store 3
-txna ApplicationArgs 2
-intc_0 // 0
-getbyte
-store 4
-load 3
-load 4
-callsub optoutasset_7
+callsub optoutassetcaster_13
 intc_1 // 1
 return
 main_l12:
@@ -114,10 +87,7 @@ intc_0 // 0
 !=
 &&
 assert
-txna ApplicationArgs 1
-intc_0 // 0
-getbyte
-callsub optinasset_6
+callsub optinassetcaster_12
 intc_1 // 1
 return
 main_l13:
@@ -129,18 +99,7 @@ intc_0 // 0
 !=
 &&
 assert
-txna ApplicationArgs 1
-store 0
-txna ApplicationArgs 2
-intc_0 // 0
-getbyte
-store 1
-txna ApplicationArgs 3
-store 2
-load 0
-load 1
-load 2
-callsub mint_5
+callsub mintcaster_11
 intc_1 // 1
 return
 main_l14:
@@ -228,50 +187,67 @@ proto 0 0
 bytec_0 // "manager"
 global CreatorAddress
 app_global_put
-bytec_2 // "note"
+bytec_3 // "note"
 bytec_1 // ""
 app_global_put
-bytec_3 // "reserve"
+bytec 4 // "reserve"
 global CreatorAddress
 app_global_put
-bytec 4 // "url"
+bytec_2 // "token_id"
+intc_0 // 0
+app_global_put
+bytec 5 // "url"
 bytec_1 // ""
 app_global_put
 retsub
 
 // mint
 mint_5:
-proto 3 0
+proto 4 0
 txn Sender
 bytec_0 // "manager"
 app_global_get
 ==
 // unauthorized
 assert
-bytec 4 // "url"
+bytec 5 // "url"
 app_global_get
 bytec_1 // ""
 ==
 assert
-bytec_2 // "note"
+bytec_3 // "note"
 app_global_get
 bytec_1 // ""
 ==
 assert
-bytec_3 // "reserve"
+bytec 4 // "reserve"
 app_global_get
 global CreatorAddress
 ==
 assert
-bytec 4 // "url"
-frame_dig -3
-app_global_put
-bytec_2 // "note"
+bytec_2 // "token_id"
+app_global_get
+intc_0 // 0
+==
+assert
+itxn_begin
 frame_dig -1
+txnas Assets
+callsub optin_2
+itxn_submit
+bytec 5 // "url"
+frame_dig -4
 app_global_put
-bytec_3 // "reserve"
+bytec_3 // "note"
 frame_dig -2
+app_global_put
+bytec 4 // "reserve"
+frame_dig -3
 txnas Accounts
+app_global_put
+bytec_2 // "token_id"
+frame_dig -1
+txnas Assets
 app_global_put
 retsub
 
@@ -288,6 +264,12 @@ retsub
 // opt_out_asset
 optoutasset_7:
 proto 2 0
+bytec_2 // "token_id"
+app_global_get
+frame_dig -2
+txnas Assets
+!=
+assert
 itxn_begin
 frame_dig -2
 txnas Assets
@@ -305,6 +287,12 @@ bytec_0 // "manager"
 app_global_get
 ==
 // unauthorized
+assert
+bytec_2 // "token_id"
+app_global_get
+frame_dig -3
+txnas Assets
+!=
 assert
 itxn_begin
 frame_dig -1
@@ -343,4 +331,100 @@ assert
 itxn_begin
 callsub freeappmbr_1
 itxn_submit
+retsub
+
+// mint_caster
+mintcaster_11:
+proto 0 0
+bytec_1 // ""
+intc_0 // 0
+bytec_1 // ""
+intc_0 // 0
+txna ApplicationArgs 1
+frame_bury 0
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+frame_bury 1
+txna ApplicationArgs 3
+frame_bury 2
+txna ApplicationArgs 4
+intc_0 // 0
+getbyte
+frame_bury 3
+frame_dig 0
+frame_dig 1
+frame_dig 2
+frame_dig 3
+callsub mint_5
+retsub
+
+// opt_in_asset_caster
+optinassetcaster_12:
+proto 0 0
+intc_0 // 0
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+frame_dig 0
+callsub optinasset_6
+retsub
+
+// opt_out_asset_caster
+optoutassetcaster_13:
+proto 0 0
+intc_0 // 0
+dup
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+frame_bury 1
+frame_dig 0
+frame_dig 1
+callsub optoutasset_7
+retsub
+
+// withdraw_caster
+withdrawcaster_14:
+proto 0 0
+intc_0 // 0
+dupn 2
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+txna ApplicationArgs 2
+btoi
+frame_bury 1
+txna ApplicationArgs 3
+intc_0 // 0
+getbyte
+frame_bury 2
+frame_dig 0
+frame_dig 1
+frame_dig 2
+callsub withdraw_8
+retsub
+
+// grant_caster
+grantcaster_15:
+proto 0 0
+intc_0 // 0
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+frame_dig 0
+callsub grant_9
+retsub
+
+// delete_caster
+deletecaster_16:
+proto 0 0
+callsub delete_10
 retsub
