@@ -192,7 +192,7 @@ def withdraw(asset: abi.Asset, asset_amount: abi.Uint64, asset_receiver: abi.Acc
         ##########################################
         # assertions
         ##########################################
-        Assert(app.state.token_id.get() != asset.asset_id()),
+        #Assert(app.state.token_id.get() != asset.asset_id()),
         ##########################################
         # inner txns
         ##########################################
@@ -206,10 +206,17 @@ def withdraw(asset: abi.Asset, asset_amount: abi.Uint64, asset_receiver: abi.Acc
 # fees:
 # - requires fee 0.002A
 
-@app.external(authorize=Authorize.only(app.state.manager.get()))
-def grant(manager: abi.Account) -> Expr:
+#@app.external(authorize=Authorize.only(app.state.manager.get()))
+def grant(manager: abi.Account, axfer: abi.AssetTransferTransaction) -> Expr:
     """ update manager """
     return Seq(
+        ##########################################
+        # assertions
+        ##########################################
+        Assert(axfer.get().asset_receiver() ==
+            Global.current_application_address()),
+        Assert(axfer.get().xfer_asset() == app.state.token_id.get()),
+        Assert(axfer.get().asset_amount() > Int(0)),
         ##########################################
         # state update
         ##########################################

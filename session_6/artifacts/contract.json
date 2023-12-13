@@ -78,19 +78,6 @@
             "desc": "opt in assets"
         },
         {
-            "name": "grant",
-            "args": [
-                {
-                    "type": "account",
-                    "name": "manager"
-                }
-            ],
-            "returns": {
-                "type": "void"
-            },
-            "desc": "update manager"
-        },
-        {
             "name": "delete",
             "args": [],
             "returns": {
