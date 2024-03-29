@@ -206,7 +206,7 @@ def withdraw(asset: abi.Asset, asset_amount: abi.Uint64, asset_receiver: abi.Acc
 # fees:
 # - requires fee 0.002A
 
-#@app.external(authorize=Authorize.only(app.state.manager.get()))
+@app.external
 def grant(manager: abi.Account, axfer: abi.AssetTransferTransaction) -> Expr:
     """ update manager """
     return Seq(
