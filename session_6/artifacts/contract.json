@@ -87,6 +87,10 @@
                 {
                     "type": "axfer",
                     "name": "axfer"
+                },
+                {
+                    "type": "asset",
+                    "name": "asset"
                 }
             ],
             "returns": {
