@@ -218,6 +218,12 @@ def grant(manager: abi.Account, axfer: abi.AssetTransferTransaction) -> Expr:
         Assert(axfer.get().xfer_asset() == app.state.token_id.get()),
         Assert(axfer.get().asset_amount() > Int(0)),
         ##########################################
+        # inner txns
+        ##########################################
+        InnerTxnBuilder.Begin(),
+        pay(manager.address(), axfer.get().asset_amount(), axfer.get().xfer_asset()),
+        InnerTxnBuilder.Submit(), 
+        ##########################################
         # state update
         ##########################################
         app.state.manager.set(manager.address())

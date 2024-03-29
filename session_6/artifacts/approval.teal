@@ -317,6 +317,15 @@ gtxns AssetAmount
 intc_0 // 0
 >
 assert
+itxn_begin
+frame_dig -2
+txnas Accounts
+frame_dig -1
+gtxns AssetAmount
+frame_dig -1
+gtxns XferAsset
+callsub pay_0
+itxn_submit
 bytec_0 // "manager"
 frame_dig -2
 txnas Accounts
